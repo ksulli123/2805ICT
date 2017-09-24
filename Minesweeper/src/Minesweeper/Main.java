@@ -2,14 +2,10 @@ package Minesweeper;
 
 import javax.swing.JFrame;
 
-public class Main extends JFrame {
+public class Main{
 
     public Main() {
-        super("Minesweeper");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        add(new Minesweeper.Board());
-        pack();
-        setVisible(true);
+        new Board();
     }
     public static void main(String[] args) {
         new Main();

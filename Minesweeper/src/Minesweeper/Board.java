@@ -1,51 +1,104 @@
 package Minesweeper;
 
-import java.awt.Dimension;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ContainerAdapter;
 import java.util.Random;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
+import java.lang.*;
 
-public class Board extends JPanel implements ActionListener{
+public class Board extends JFrame implements ActionListener{
 
     private int totalMines;
-    private Minesweeper.Square[][] squares;
+    private int totalHexMines;
     private Dimension gridSize;
-    private int visibleBlocks;
+    private int visibleBlocks, visibleHexBlocks;
+    private String[] options = {"Standard", "Hexagon"};
+    private String mode;
+    private JComboBox c = new JComboBox<String>(options);
+    private JButton startButton = new JButton("Start Game");
+    private boolean exists = false;
+    private JPanel content = new JPanel();
+    private Square[][] squares;
+    private Hexagon[][] hexagons;
+
 
     //Block Types - Numbers correspond to mines around them, 9 is a mine.
     public Board() {
         gridSize = new Dimension(20,20);
-        //setPreferredSize(new Dimension(800,600));
-        setLayout(new GridLayout(gridSize.height,gridSize.width));
+        setPreferredSize(new Dimension(600,600));
+        setLayout(new GridLayout(2,2));
+        JPanel header = new JPanel();
 
         totalMines = 20;
+        totalHexMines = 5;
         visibleBlocks = gridSize.width * gridSize.height;
+        visibleHexBlocks = 7 * 7;
 
-        squares = new Square[gridSize.height][gridSize.width];
-        for (int i = 0; i < gridSize.width; i++) {
-            for (int j = 0; j < gridSize.height; j++) {
-                squares[i][j] = new Square(i,j);
-                squares[i][j].addActionListener(this);
-                add(squares[i][j]);
-            }
-        }
+        startButton.setPreferredSize(new Dimension(100,40));
+        startButton.addActionListener(this);
+        startButton.setActionCommand("Start");
+        header.setMaximumSize(new Dimension(20,20));
+        header.add(c);
+        header.add(startButton);
+        add(header);
+        add(content);
 
-        addMines();
 
+        content.setMaximumSize(new Dimension(400,400));
+        content.setLayout(new GridLayout(20,20));
+
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        pack();
         setVisible(true);
+        setResizable(false);
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        try {
-            showBlock((Square)(e.getSource()));
-        } catch(Exception exc) {
-            System.err.println(
-                    exc.getMessage()+"Board's ActionListener only for Block objects"
-            );
+
+    public void init() {
+        if (mode == "Standard") {
+            squares = new Square[gridSize.height][gridSize.width];
+            System.out.println("Test");
+            //content.setPreferredSize(new Dimension(200,200));
+            for (int i = 0; i < gridSize.width; i++) {
+                for (int j = 0; j < gridSize.height; j++) {
+                    squares[i][j] = new Square(i, j);
+                    squares[i][j].addActionListener(this);
+                    content.add(squares[i][j]);
+                }
+            }
+            exists = true;
+            addMines();
+            setVisible(true);
+        } else if(mode=="Hexagon") {
+            JFrame f = new JFrame();
+            f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            f.setLayout(new HexagonalLayout(7, new Insets(1, 1, 1, 1), false));
+            f.setMinimumSize(new Dimension(500, 500));
+            hexagons = new Hexagon[6][6];
+
+            System.out.println("Does");
+            Border border = new LineBorder(Color.white,13);
+            for (int i = 0; i < 6; i++) {
+                    for (int j = 0; j < 6; j++) {
+
+
+                        hexagons[i][j] = new Hexagon(i, j);
+                        hexagons[i][j].setBackground(Color.black);
+                        hexagons[i][j].setBorder(border);
+
+                        //"Random" color actionlistener, just for fun.
+                        hexagons[i][j].setActionCommand("hex");
+                        hexagons[i][j].addActionListener(this);
+                        f.add(hexagons[i][j]);
+                    }
+                }
+            addHexMines();
+            f.setVisible(true);
         }
     }
 
@@ -65,6 +118,26 @@ public class Board extends JPanel implements ActionListener{
             showGameOver();
     }
 
+    private void showBlock(Hexagon hexagon) {
+        hexagon.setEnabled(false);
+        System.out.println(String.valueOf(hexagon.getRow()) + "," + String.valueOf(hexagon.getColumn()));
+        if (hexagon.noMines())
+            showHexNeighbours(hexagon);
+        else if (hexagon.isMine()) {
+            System.out.println("Here");
+            showHexGameOver();
+        }
+        else {
+            hexagon.setText(Integer.toString(hexagon.getType()));
+        }
+
+        visibleHexBlocks--;
+
+        if (visibleHexBlocks == totalHexMines)
+            showHexGameOver();
+    }
+
+
     private void showMines() {
         for (Square[] rowSquares : squares) {
             for (Square square : rowSquares) {
@@ -74,9 +147,31 @@ public class Board extends JPanel implements ActionListener{
         }
     }
 
+    private void showHexMines() {
+        for (Hexagon[] rowHexagons : hexagons) {
+            for (Hexagon hexagon: rowHexagons) {
+                if (hexagon.isMine()) {
+                    hexagon.setText("X");
+                }
+            }
+        }
+    }
+
+
     private void showGameOver() {
         if (visibleBlocks != totalMines) { //Lose
             showMines();
+            JOptionPane.showMessageDialog(this,"You lose!");
+        } else {
+            JOptionPane.showMessageDialog(this,"You win!");
+        }
+
+        System.exit(0);
+    }
+
+    private void showHexGameOver() {
+        if (visibleHexBlocks != totalHexMines) { //Lose
+            showHexMines();
             JOptionPane.showMessageDialog(this,"You lose!");
         } else {
             JOptionPane.showMessageDialog(this,"You win!");
@@ -94,6 +189,7 @@ public class Board extends JPanel implements ActionListener{
             int j = random.nextInt(squares[0].length);
             if (!squares[i][j].isMine()) {
                 squares[i][j].setMine();
+
                 for (int row = i-1;row <= i+1; row++) {
                     for (int col = j-1; col <= j+1; col++) {
                         if (row == i && col == j)
@@ -112,6 +208,39 @@ public class Board extends JPanel implements ActionListener{
         }
     }
 
+
+    private void addHexMines() {
+        int mineCount = 0;
+        Random random = new Random();
+
+        while (mineCount != totalHexMines) {
+            int i = random.nextInt(hexagons.length);
+            int j = random.nextInt(hexagons[0].length);
+            if (!hexagons[i][j].isMine()) {
+                hexagons[i][j].setMine();
+                for (int row = i-1;row <= i+1; row++) {
+                    for (int col = j-1; col <= j+1; col++) {
+                        if (row == i && col == j)
+                            continue; //Skip Centre
+                        if (row < 0 || row > 5 ||
+                                col < 0 || col > 5
+                                )
+                            continue; //Out of Bounds
+                        if(Math.abs(Math.abs((i-row))+Math.abs((j-col)))   >=2){
+                            continue;
+                        } else {
+                            if(!hexagons[row][col].isMine())
+                                hexagons[row][col].addMine();
+                        }
+                    }
+                }
+
+                mineCount++;
+            }
+        }
+    }
+
+
     public void showNeighbours(Square square) {
         int row = square.getRow();
         int col = square.getColumn();
@@ -124,6 +253,47 @@ public class Board extends JPanel implements ActionListener{
                     continue; //Out of Bounds
                 if(squares[i][j].isEnabled())
                     showBlock(squares[i][j]);
+            }
+        }
+    }
+
+    public void showHexNeighbours(Hexagon hexagon){
+        int row = hexagon.getRow();
+        int col = hexagon.getColumn();
+
+        for (int i = row-1;i <= row+1; i++) {
+            for (int j = col-1; j <= col+1; j++) {
+                if(i%2==0){
+                    
+
+                }
+
+
+
+                if (i == row && j == col)
+                    continue; //Skip Centre
+                if (i < 0 || i > 5 || j < 0 || j > 5)
+                    continue; //Out of Bounds
+                if(hexagons[i][j].isEnabled())
+                    showBlock(hexagons[i][j]);
+            }
+        }
+    }
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if("Start".equals(e.getActionCommand())) {
+            mode = (String) c.getSelectedItem();
+            System.out.println(mode);
+            init();
+        } else if ("hex".equals(e.getActionCommand())) {
+            showBlock((Hexagon) (e.getSource()));
+        } else {
+            try {
+                showBlock((Square) (e.getSource()));
+            } catch (Exception exc){
+                System.err.println(
+                        exc.getMessage() + "Board's ActionListener only for Block objects"
+                );
             }
         }
     }

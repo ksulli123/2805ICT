@@ -10,7 +10,7 @@ public class Square extends JButton{
     private int type;
 
     public Square(int row, int col) {
-        setPreferredSize(new Dimension(24,24));
+        setPreferredSize(new Dimension(10,10));
         setMargin(new Insets(1,1,1,1));
 
         this.row = row;
