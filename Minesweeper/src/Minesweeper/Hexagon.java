@@ -1,11 +1,6 @@
 package Minesweeper;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Point;
-import java.awt.Polygon;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 
 import javax.swing.*;
@@ -144,12 +139,18 @@ public class Hexagon extends JButton {
         g.setColor(getBackground());
         g.fillPolygon(hexagonalShape);
 
-            g.setColor(Color.WHITE);
-            String rowcol = String.valueOf(row) + "," + String.valueOf(col) + "," + String.valueOf(type);
-            g.drawString(String.valueOf(rowcol), 20,20);
-
-
-
+        g.setColor(Color.black);
+        Font font = new Font("Verdana", Font.BOLD, 16);
+        g.setFont(font);
+        String rowcol = String.valueOf(row) + "," + String.valueOf(col) + "," + String.valueOf(type);
+        if(type==0) {
+            //nothing
+        }
+        else if(type==9){
+            g.drawString("X", 20,30);
+        } else{
+            g.drawString(String.valueOf(type), 25,35);
+        }
     }
     @Override
     public void setEnabled(boolean b){

@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Applet" type="Applet" factoryName="Applet">
+    <option name="WIDTH" value="0" />
+    <option name="MAIN_CLASS_NAME" value="Minesweeper.Main" />
+    <option name="HEIGHT" value="0" />
+    <module name="Minesweeper" />
+    <method />
+  </configuration>
+</component>

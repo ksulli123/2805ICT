@@ -17,7 +17,7 @@ public class Board extends JFrame implements ActionListener{
     private int totalHexMines;
     private Dimension gridSize;
     private int visibleBlocks, visibleHexBlocks;
-    private String[] options = {"Standard", "Hexagon"};
+    private String[] options = {"Standard", "Hexagon", "Colored"};
     private String mode;
     private JComboBox c = new JComboBox<String>(options);
     private JButton startButton = new JButton("Start Game");
@@ -25,6 +25,7 @@ public class Board extends JFrame implements ActionListener{
     private JPanel content = new JPanel();
     private Square[][] squares;
     private Hexagon[][] hexagons;
+    private Circle[] circles;
 
 
     //Block Types - Numbers correspond to mines around them, 9 is a mine.
@@ -37,7 +38,7 @@ public class Board extends JFrame implements ActionListener{
         totalMines = 20;
         totalHexMines = 5;
         visibleBlocks = gridSize.width * gridSize.height;
-        visibleHexBlocks = 7 * 7;
+        visibleHexBlocks = 36;
 
         startButton.setPreferredSize(new Dimension(100,40));
         startButton.addActionListener(this);
@@ -99,6 +100,22 @@ public class Board extends JFrame implements ActionListener{
                 }
             addHexMines();
             f.setVisible(true);
+        } else if(mode=="Colored"){
+            System.out.println("Test123");
+            JFrame f = new JFrame();
+            f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            f.setLayout(new GridLayout(2,2));
+            f.setMinimumSize(new Dimension(500, 500));
+            circles = new Circle[10];
+            for(int i = 0; i < 10; i++){
+                circles[i] = new Circle();
+                circles[i].setPreferredSize(new Dimension(20,20));
+                circles[i].addActionListener(this);
+                circles[i].setActionCommand("circle");
+                f.add(circles[i]);
+            }
+            f.setVisible(true);
+            f.setResizable(false);
         }
     }
 
@@ -226,15 +243,27 @@ public class Board extends JFrame implements ActionListener{
                                 col < 0 || col > 5
                                 )
                             continue; //Out of Bounds
-                        if(Math.abs(Math.abs((i-row))+Math.abs((j-col)))   >=2){
-                            continue;
+                        if(i%2==0){
+                            if(row==(i+1)&&col==(j+1)){
+                                continue;
+                            } else if(row==(i-1)&&col==(j+1)) {
+                                continue;
+                            } else {
+                                if(!hexagons[row][col].isMine())
+                                    hexagons[row][col].addMine();
+                            }
                         } else {
-                            if(!hexagons[row][col].isMine())
-                                hexagons[row][col].addMine();
+                            if(row==(i-1)&&col==(j-1)){
+                                continue;
+                            } else if(row==(i+1)&&col==(j-1)){
+
+                            } else {
+                                if(!hexagons[row][col].isMine())
+                                    hexagons[row][col].addMine();
+                            }
                         }
                     }
                 }
-
                 mineCount++;
             }
         }
@@ -263,19 +292,30 @@ public class Board extends JFrame implements ActionListener{
 
         for (int i = row-1;i <= row+1; i++) {
             for (int j = col-1; j <= col+1; j++) {
-                if(i%2==0){
-                    
-
-                }
-
-
 
                 if (i == row && j == col)
                     continue; //Skip Centre
                 if (i < 0 || i > 5 || j < 0 || j > 5)
                     continue; //Out of Bounds
-                if(hexagons[i][j].isEnabled())
-                    showBlock(hexagons[i][j]);
+                if(row%2==0){
+                    if(i==(row+1)&&j==(col+1)){
+                        continue;
+                    } else if(i==(row-1)&&j==(col+1)) {
+                        continue;
+                    } else {
+                        if(hexagons[i][j].isEnabled())
+                            showBlock(hexagons[i][j]);
+                    }
+                } else {
+                    if(i==(row-1)&&j==(col-1)){
+                        continue;
+                    } else if(i==(row+1)&&j==(col-1)) {
+                        continue;
+                    } else {
+                        if(hexagons[i][j].isEnabled())
+                            showBlock(hexagons[i][j]);
+                    }
+                }
             }
         }
     }
