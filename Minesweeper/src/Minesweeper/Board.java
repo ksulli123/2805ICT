@@ -10,6 +10,7 @@ import javax.swing.JFrame;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import java.lang.*;
+import javax.swing.Timer;
 
 public class Board extends JFrame implements ActionListener{
 
@@ -26,7 +27,10 @@ public class Board extends JFrame implements ActionListener{
     private Square[][] squares;
     private Hexagon[][] hexagons;
     private Circle[] circles;
-
+    private Timer timer = new Timer(1000,this);
+    private int time;
+    private static final String INCREMENT = "incr";
+    private JButton[] circlesBtn;
 
     //Block Types - Numbers correspond to mines around them, 9 is a mine.
     public Board() {
@@ -34,6 +38,7 @@ public class Board extends JFrame implements ActionListener{
         setPreferredSize(new Dimension(600,600));
         setLayout(new GridLayout(2,2));
         JPanel header = new JPanel();
+
 
         totalMines = 20;
         totalHexMines = 5;
@@ -47,11 +52,8 @@ public class Board extends JFrame implements ActionListener{
         header.add(c);
         header.add(startButton);
         add(header);
-        add(content);
+        timer.setActionCommand(INCREMENT);
 
-
-        content.setMaximumSize(new Dimension(400,400));
-        content.setLayout(new GridLayout(20,20));
 
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         pack();
@@ -61,25 +63,35 @@ public class Board extends JFrame implements ActionListener{
 
 
     public void init() {
+        timer.start();
         if (mode == "Standard") {
             squares = new Square[gridSize.height][gridSize.width];
+            JFrame f = new JFrame();
+            f.setLayout(new GridLayout(gridSize.height,gridSize.width));
+            f.setSize(new Dimension(400,500));
+            f.setMinimumSize(new Dimension(400,500));
+            f.setTitle("Minesweeper");
+
+
+
             System.out.println("Test");
             //content.setPreferredSize(new Dimension(200,200));
             for (int i = 0; i < gridSize.width; i++) {
                 for (int j = 0; j < gridSize.height; j++) {
                     squares[i][j] = new Square(i, j);
                     squares[i][j].addActionListener(this);
-                    content.add(squares[i][j]);
+                    f.add(squares[i][j]);
                 }
             }
             exists = true;
             addMines();
-            setVisible(true);
+            f.setVisible(true);
         } else if(mode=="Hexagon") {
             JFrame f = new JFrame();
             f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             f.setLayout(new HexagonalLayout(7, new Insets(1, 1, 1, 1), false));
             f.setMinimumSize(new Dimension(500, 500));
+            f.setTitle("Hexagonal Minesweeper");
             hexagons = new Hexagon[6][6];
 
             System.out.println("Does");
@@ -104,18 +116,33 @@ public class Board extends JFrame implements ActionListener{
             System.out.println("Test123");
             JFrame f = new JFrame();
             f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            f.setLayout(new GridLayout(2,2));
+            //f.setLayout(new BorderLayout());
+            JPanel content = new JPanel();
+            content.setLayout(null);
+            f.setSize(new Dimension(400,500));
+            f.setLocationRelativeTo(null);
             f.setMinimumSize(new Dimension(500, 500));
+            circlesBtn = new JButton[10];
             circles = new Circle[10];
             for(int i = 0; i < 10; i++){
+                int x,y;
+                Random generator = new Random();
+                x = generator.nextInt(400);
+                y = generator.nextInt(400);
                 circles[i] = new Circle();
-                circles[i].setPreferredSize(new Dimension(20,20));
-                circles[i].addActionListener(this);
-                circles[i].setActionCommand("circle");
-                f.add(circles[i]);
+                circlesBtn[i] = new JButton(circles[i]);
+                circlesBtn[i].addActionListener(this);
+                circlesBtn[i].setPreferredSize(new Dimension(40,40));
+                circlesBtn[i].setMaximumSize(new Dimension(40,40));
+                circlesBtn[i].setActionCommand("circle");
+                circlesBtn[i].setBounds(x,y,40,40);
+                content.add(circlesBtn[i]);
             }
+            for(int i = 1; i < 9; i++){
+                circles.setConnected();
+            }
+            f.add(content, BorderLayout.CENTER);
             f.setVisible(true);
-            f.setResizable(false);
         }
     }
 
@@ -141,7 +168,6 @@ public class Board extends JFrame implements ActionListener{
         if (hexagon.noMines())
             showHexNeighbours(hexagon);
         else if (hexagon.isMine()) {
-            System.out.println("Here");
             showHexGameOver();
         }
         else {
@@ -176,11 +202,12 @@ public class Board extends JFrame implements ActionListener{
 
 
     private void showGameOver() {
+        timer.stop();
         if (visibleBlocks != totalMines) { //Lose
             showMines();
             JOptionPane.showMessageDialog(this,"You lose!");
         } else {
-            JOptionPane.showMessageDialog(this,"You win!");
+            JOptionPane.showMessageDialog(this,"You win!   Time taken: "+String.valueOf(time) + " Seconds.");
         }
 
         System.exit(0);
@@ -193,8 +220,6 @@ public class Board extends JFrame implements ActionListener{
         } else {
             JOptionPane.showMessageDialog(this,"You win!");
         }
-
-        System.exit(0);
     }
 
     private void addMines() {
@@ -321,12 +346,17 @@ public class Board extends JFrame implements ActionListener{
     }
     @Override
     public void actionPerformed(ActionEvent e) {
+        if(e.getActionCommand().equals(INCREMENT)){
+            time++;
+        }
         if("Start".equals(e.getActionCommand())) {
             mode = (String) c.getSelectedItem();
             System.out.println(mode);
             init();
         } else if ("hex".equals(e.getActionCommand())) {
             showBlock((Hexagon) (e.getSource()));
+        } else if ("circle".equals(e.getActionCommand())){
+            System.out.println("he");
         } else {
             try {
                 showBlock((Square) (e.getSource()));

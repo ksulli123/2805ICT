@@ -8,28 +8,60 @@ import javax.swing.*;
 /**
  * Created by r-ken on 9/25/2017.
  */
-public class Circle extends JButton{
+public class Circle implements Icon{
+
+
     String colour;
     private int count, num;
-    Circle connected;
+    private Circle[] connected = new Circle[2];
     boolean activated;
+    String color;
     public Circle(){
-        Random randColour = new Random();
-        num = randColour.nextInt(4);
+        Random generator = new Random();
+        num = generator.nextInt(4);
+        switch(num){
+            case 0:
+                color="Blue";
+                break;
+            case 1:
+                color="Red";
+                break;
+            case 2:
+                color="Black";
+                break;
+            case 3:
+                color="Yellow";
+                break;
+            default:
+                color="Null";
+                break;
+        }
     }
 
+
     @Override
-    protected void paintComponent(Graphics g){
+    public void paintIcon(Component c, Graphics g, int x, int y){
+        Graphics2D g2 = (Graphics2D) g.create();
         Random generator = new Random();
-        int x, y;
         int diameter = 30;
-        x = generator.nextInt(30);
-        y = generator.nextInt(30);
-        g.drawOval(x,y,diameter,diameter);
+        x = generator.nextInt(400);
+        y = generator.nextInt(400);
+        g2.setColor(Color.BLACK);
+        g2.drawOval(5,5,getIconWidth(),getIconHeight());
+        g2.fillOval(5,5,getIconWidth(),getIconHeight());
+        g2.dispose();
     }
     @Override
-    protected void processMouseEvent(MouseEvent e) {
-        if (contains(e.getPoint()))
-            super.processMouseEvent(e);
+    public int getIconWidth(){
+        return 30;
     }
+    @Override
+    public int getIconHeight(){
+        return 30;
+    }
+    public void setConnected(Circle connected, Circle connecto){
+        this.connected[0] = connected;
+        this.connected[1] = connecto;
+    }
+    
 }
