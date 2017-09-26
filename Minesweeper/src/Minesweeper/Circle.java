@@ -63,5 +63,8 @@ public class Circle implements Icon{
         this.connected[0] = connected;
         this.connected[1] = connecto;
     }
-    
+    public void setBackground(boolean b){
+
+    }
+
 }

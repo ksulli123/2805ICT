@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ContainerAdapter;
+import java.util.Arrays;
 import java.util.Random;
 import javax.swing.*;
 import javax.swing.JFrame;
@@ -130,7 +131,8 @@ public class Board extends JFrame implements ActionListener{
                 x = generator.nextInt(400);
                 y = generator.nextInt(400);
                 circles[i] = new Circle();
-                circlesBtn[i] = new JButton(circles[i]);
+
+                circlesBtn[i] = new JButton();
                 circlesBtn[i].addActionListener(this);
                 circlesBtn[i].setPreferredSize(new Dimension(40,40));
                 circlesBtn[i].setMaximumSize(new Dimension(40,40));
@@ -139,7 +141,7 @@ public class Board extends JFrame implements ActionListener{
                 content.add(circlesBtn[i]);
             }
             for(int i = 1; i < 9; i++){
-                circles.setConnected();
+                circles[i].setConnected(circles[i-1],circles[i+1]);
             }
             f.add(content, BorderLayout.CENTER);
             f.setVisible(true);
@@ -357,6 +359,10 @@ public class Board extends JFrame implements ActionListener{
             showBlock((Hexagon) (e.getSource()));
         } else if ("circle".equals(e.getActionCommand())){
             System.out.println("he");
+            int circleNum = Arrays.asList(circlesBtn).indexOf(e.getSource());
+            circlesBtn[circleNum] = new JButton(circles[circleNum]);
+            circlesBtn[circleNum].revalidate();
+            circlesBtn[circleNum].repaint();
         } else {
             try {
                 showBlock((Square) (e.getSource()));
